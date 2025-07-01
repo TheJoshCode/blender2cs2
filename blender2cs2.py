@@ -214,19 +214,48 @@ def export_object_fbx(obj, export_root):
         embed_textures=False
     )
 
+def export_combined_fbx(context, export_root):
+    combined_path = os.path.join(export_root, "combined.fbx")
+
+    # Deselect all objects first
+    bpy.ops.object.select_all(action='DESELECT')
+
+    # Select all mesh objects
+    for obj in context.scene.objects:
+        if obj.type == 'MESH':
+            obj.select_set(True)
+
+    # Export all selected as one FBX
+    bpy.ops.export_scene.fbx(
+        filepath=combined_path,
+        use_selection=True,
+        apply_scale_options='FBX_SCALE_UNITS',
+        object_types={'MESH', 'EMPTY', 'ARMATURE'},
+        bake_space_transform=True,
+        axis_forward='-Z',
+        axis_up='Y',
+        mesh_smooth_type='FACE',
+        use_mesh_modifiers=True,
+        add_leaf_bones=False,
+        path_mode='COPY',
+        embed_textures=False
+    )
+
+
 def export_all(context, export_root):
-    # Create materials directory
     materials_dir = os.path.join(export_root, "materials")
     os.makedirs(materials_dir, exist_ok=True)
 
-    # Export materials
     for mat in bpy.data.materials:
         export_material(mat, materials_dir)
 
-    # Export each mesh object as individual FBX inside models folder
     for obj in context.scene.objects:
         if obj.type == 'MESH':
             export_object_fbx(obj, export_root)
+
+    # Export combined FBX with all mesh objects
+    export_combined_fbx(context, export_root)
+
 
 class ExportCS2Operator(bpy.types.Operator):
     bl_idname = "export_scene.cs2_export"

@@ -46,7 +46,12 @@ def get_texture_path(material, socket_name, output_dir):
             tex_path = Path(output_dir) / f"{tex_node.image.name}.tga"
             save_image(tex_node.image, tex_path)
             return f"materials/{tex_node.image.name}.tga"
+    
+    # Handle default texture fallback
+    if socket_name == "Roughness":
+        return "materials/default/default_rough.tga"
     return f"materials/default/default_{socket_name.lower()}.tga"
+
 
 def get_surface_type(material_name):
     """Determine surface type from material name."""
